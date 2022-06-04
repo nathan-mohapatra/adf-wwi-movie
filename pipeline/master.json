@@ -1,0 +1,21 @@
+{
+	"name": "master",
+	"properties": {
+		"activities": [
+			{
+				"name": "movie",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "movie",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}

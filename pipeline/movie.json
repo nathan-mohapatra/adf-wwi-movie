@@ -1,0 +1,21 @@
+{
+	"name": "movie",
+	"properties": {
+		"activities": [
+			{
+				"name": "raw_to_bronze_to_silver",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "raw_to_bronze_to_silver",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": []
+	}
+}
