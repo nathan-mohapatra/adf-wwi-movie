@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "data_1d308008-09fa-4219-8698-f11abf8aecf4_8bc931cd-eb03-4cc8-81e9-c55d87c6cfa9.json",
 				"fileSystem": "raw-movie"
 			}
 		},

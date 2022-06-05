@@ -15,7 +15,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "bronze_movie",
+						"referenceName": "bronze_movie_source",
 						"type": "DatasetReference"
 					},
 					"name": "bronze"
@@ -54,6 +54,13 @@
 				"          status = \"new\") ~> addMetadata",
 				"addMetadata sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     input(",
+				"          value as string,",
+				"          datasource as string,",
+				"          ingestdate as date,",
+				"          ingesttime as timestamp,",
+				"          status as string",
+				"     ),",
 				"     format: 'parquet',",
 				"     umask: 0022,",
 				"     preCommands: [],",
