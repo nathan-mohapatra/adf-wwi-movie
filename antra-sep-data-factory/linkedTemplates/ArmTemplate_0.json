@@ -199,7 +199,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "movie_*.json",
+						"fileName": "*.json",
 						"fileSystem": "raw-movie"
 					}
 				},
@@ -312,7 +312,7 @@
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
 									"recursive": true,
-									"wildcardFileName": "movie_*.json",
+									"wildcardFileName": "*.json",
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
