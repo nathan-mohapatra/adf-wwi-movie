@@ -1,19 +1,19 @@
 {
-	"name": "raw_movie_source",
+	"name": "bronze_movie",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_AzureDataLakeStorage",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
-		"type": "Json",
+		"type": "Parquet",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "movie_*.json",
-				"fileSystem": "raw-movie"
-			}
+				"fileSystem": "bronze-movie"
+			},
+			"compressionCodec": "snappy"
 		},
-		"schema": {}
+		"schema": []
 	}
 }
