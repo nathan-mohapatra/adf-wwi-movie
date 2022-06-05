@@ -55,7 +55,74 @@
 					},
 					"compressionCodec": "snappy"
 				},
-				"schema": []
+				"schema": [
+					{
+						"name": "value",
+						"type": "UTF8"
+					},
+					{
+						"name": "datasource",
+						"type": "UTF8"
+					},
+					{
+						"name": "ingestdate",
+						"type": "DATE"
+					},
+					{
+						"name": "ingesttime",
+						"type": "INT96"
+					},
+					{
+						"name": "status",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/bronze_movie_source')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "*.parquet",
+						"fileSystem": "bronze-movie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "value",
+						"type": "UTF8"
+					},
+					{
+						"name": "datasource",
+						"type": "UTF8"
+					},
+					{
+						"name": "ingestdate",
+						"type": "DATE"
+					},
+					{
+						"name": "ingesttime",
+						"type": "INT96"
+					},
+					{
+						"name": "status",
+						"type": "UTF8"
+					}
+				]
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
@@ -75,7 +142,6 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "data_1d308008-09fa-4219-8698-f11abf8aecf4_8bc931cd-eb03-4cc8-81e9-c55d87c6cfa9.json",
 						"fileSystem": "raw-movie"
 					}
 				},
@@ -208,7 +274,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "bronze_movie",
+								"referenceName": "bronze_movie_source",
 								"type": "DatasetReference"
 							},
 							"name": "bronze"
@@ -247,6 +313,13 @@
 						"          status = \"new\") ~> addMetadata",
 						"addMetadata sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
+						"     input(",
+						"          value as string,",
+						"          datasource as string,",
+						"          ingestdate as date,",
+						"          ingesttime as timestamp,",
+						"          status as string",
+						"     ),",
 						"     format: 'parquet',",
 						"     umask: 0022,",
 						"     preCommands: [],",
@@ -258,7 +331,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/raw_movie')]",
-				"[concat(variables('factoryId'), '/datasets/bronze_movie')]"
+				"[concat(variables('factoryId'), '/datasets/bronze_movie_source')]"
 			]
 		},
 		{
@@ -355,6 +428,70 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "ingest_bronze",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "rawToBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings",
+									"copyBehavior": "MergeFiles"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "bronze_movie_source",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "bronze_movie",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"policy": {
@@ -366,7 +503,9 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/raw_movie_source')]",
 				"[concat(variables('factoryId'), '/datasets/raw_movie')]",
-				"[concat(variables('factoryId'), '/dataflows/rawToBronze')]"
+				"[concat(variables('factoryId'), '/dataflows/rawToBronze')]",
+				"[concat(variables('factoryId'), '/datasets/bronze_movie_source')]",
+				"[concat(variables('factoryId'), '/datasets/bronze_movie')]"
 			]
 		},
 		{
