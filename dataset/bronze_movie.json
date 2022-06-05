@@ -1,5 +1,5 @@
 {
-	"name": "bronze_movie_source",
+	"name": "bronze_movie",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_AzureDataLakeStorage",
@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "*.parquet",
 				"fileSystem": "bronze-movie"
 			},
 			"compressionCodec": "snappy"
