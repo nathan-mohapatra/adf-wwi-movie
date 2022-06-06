@@ -20,7 +20,7 @@
 						"storeSettings": {
 							"type": "AzureBlobFSReadSettings",
 							"recursive": true,
-							"wildcardFileName": "*.json",
+							"wildcardFileName": "movie_*.json",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {

@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "movie.parquet",
 				"fileSystem": "bronze-movie"
 			},
 			"compressionCodec": "snappy"
