@@ -106,7 +106,7 @@
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
 									"recursive": true,
-									"wildcardFileName": "*.json",
+									"wildcardFileName": "movie_*.json",
 									"enablePartitionDiscovery": false
 								},
 								"formatSettings": {
@@ -204,7 +204,6 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "movie.parquet",
 						"fileSystem": "bronze-movie"
 					},
 					"compressionCodec": "snappy"
@@ -354,7 +353,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "*.json",
+						"fileName": "movie_*.json",
 						"fileSystem": "raw-movie"
 					}
 				},
