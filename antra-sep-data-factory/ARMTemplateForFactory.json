@@ -446,7 +446,6 @@
 						"          status as string",
 						"     ),",
 						"     format: 'parquet',",
-						"     partitionFileNames:['movie.parquet'],",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
