@@ -19,6 +19,20 @@
 						"type": "DatasetReference"
 					},
 					"name": "silver"
+				},
+				{
+					"dataset": {
+						"referenceName": "genres",
+						"type": "DatasetReference"
+					},
+					"name": "genres"
+				},
+				{
+					"dataset": {
+						"referenceName": "original_languages",
+						"type": "DatasetReference"
+					},
+					"name": "originalLanguages"
 				}
 			],
 			"transformations": [
@@ -39,6 +53,42 @@
 				},
 				{
 					"name": "select2"
+				},
+				{
+					"name": "genresSelect1"
+				},
+				{
+					"name": "genresParseJson"
+				},
+				{
+					"name": "genresFlattenJson"
+				},
+				{
+					"name": "flattenGenres"
+				},
+				{
+					"name": "genresDistinctRows"
+				},
+				{
+					"name": "filterNull"
+				},
+				{
+					"name": "genresSelect2"
+				},
+				{
+					"name": "sort"
+				},
+				{
+					"name": "addOriginalLanguages"
+				},
+				{
+					"name": "originalLanguagesSelect1"
+				},
+				{
+					"name": "originalLanguagesDistinctRows"
+				},
+				{
+					"name": "originalLanguagesSelect2"
 				}
 			],
 			"scriptLines": [
@@ -58,17 +108,17 @@
 				"     Title as string,",
 				"     Overview as string,",
 				"     Tagline as string,",
-				"     Budget as integer,",
-				"     Revenue as integer,",
+				"     Budget as double,",
+				"     Revenue as double,",
 				"     ImdbUrl as string,",
 				"     TmdbUrl as string,",
 				"     PosterUrl as string,",
 				"     BackdropUrl as string,",
 				"     OriginalLanguage as string,",
-				"     ReleaseDate as string,",
+				"     ReleaseDate as date,",
 				"     RunTime as integer,",
-				"     Price as integer,",
-				"     CreatedDate as string,",
+				"     Price as double,",
+				"     CreatedDate as date,",
 				"     genres as (id as integer,",
 				"     name as string)[])[],",
 				"     format: 'json',",
@@ -123,6 +173,69 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
+				"bronze select(mapColumn(",
+				"          value",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> genresSelect1",
+				"genresSelect1 parse(nested_json = value ? (Id as integer,",
+				"     Title as string,",
+				"     Overview as string,",
+				"     Tagline as string,",
+				"     Budget as integer,",
+				"     Revenue as integer,",
+				"     ImdbUrl as string,",
+				"     TmdbUrl as string,",
+				"     PosterUrl as string,",
+				"     BackdropUrl as string,",
+				"     OriginalLanguage as string,",
+				"     ReleaseDate as string,",
+				"     RunTime as integer,",
+				"     Price as integer,",
+				"     CreatedDate as string,",
+				"     genres as (id as integer,",
+				"     name as string)[])[],",
+				"     format: 'json',",
+				"     documentForm: 'documentPerLine') ~> genresParseJson",
+				"genresParseJson foldDown(unroll(nested_json),",
+				"     mapColumn(",
+				"          genres = nested_json.genres",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> genresFlattenJson",
+				"genresFlattenJson foldDown(unroll(genres),",
+				"     mapColumn(",
+				"          id = genres.id,",
+				"          name = genres.name",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flattenGenres",
+				"flattenGenres aggregate(groupBy(mycols = sha2(256,columns())),",
+				"     each(match(true()), $$ = first($$))) ~> genresDistinctRows",
+				"genresDistinctRows filter(name != \"\") ~> filterNull",
+				"filterNull select(mapColumn(",
+				"          id,",
+				"          name",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> genresSelect2",
+				"genresSelect2 sort(asc(id, true)) ~> sort",
+				"bronze derive(id = 1,",
+				"          language = \"English\") ~> addOriginalLanguages",
+				"addOriginalLanguages select(mapColumn(",
+				"          id,",
+				"          language",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> originalLanguagesSelect1",
+				"originalLanguagesSelect1 aggregate(groupBy(mycols = sha2(256,columns())),",
+				"     each(match(true()), $$ = first($$))) ~> originalLanguagesDistinctRows",
+				"originalLanguagesDistinctRows select(mapColumn(",
+				"          id,",
+				"          language",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> originalLanguagesSelect2",
 				"select2 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
@@ -130,7 +243,23 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> silver"
+				"     skipDuplicateMapOutputs: true) ~> silver",
+				"sort sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> genres",
+				"originalLanguagesSelect2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> originalLanguages"
 			]
 		}
 	}
