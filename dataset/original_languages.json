@@ -1,0 +1,20 @@
+{
+	"name": "original_languages",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "original-languages",
+				"fileSystem": "silver-movie"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}

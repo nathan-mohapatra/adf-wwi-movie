@@ -1,0 +1,20 @@
+{
+	"name": "genres",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureDataLakeStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "genres",
+				"fileSystem": "silver-movie"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}

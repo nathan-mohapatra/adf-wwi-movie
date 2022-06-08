@@ -1,0 +1,137 @@
+{
+	"name": "bronzeToSilver",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronze_movie",
+						"type": "DatasetReference"
+					},
+					"name": "bronze"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_movie",
+						"type": "DatasetReference"
+					},
+					"name": "silver"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filterStatus"
+				},
+				{
+					"name": "parseJson"
+				},
+				{
+					"name": "flattenJson"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "addForeignKeys"
+				},
+				{
+					"name": "select2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          value as string,",
+				"          datasource as string,",
+				"          ingestdate as date,",
+				"          ingesttime as timestamp,",
+				"          status as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> bronze",
+				"bronze filter(status == \"new\") ~> filterStatus",
+				"select1 parse(nested_json = value ? (Id as integer,",
+				"     Title as string,",
+				"     Overview as string,",
+				"     Tagline as string,",
+				"     Budget as integer,",
+				"     Revenue as integer,",
+				"     ImdbUrl as string,",
+				"     TmdbUrl as string,",
+				"     PosterUrl as string,",
+				"     BackdropUrl as string,",
+				"     OriginalLanguage as string,",
+				"     ReleaseDate as string,",
+				"     RunTime as integer,",
+				"     Price as integer,",
+				"     CreatedDate as string,",
+				"     genres as (id as integer,",
+				"     name as string)[])[],",
+				"     format: 'json',",
+				"     documentForm: 'documentPerLine') ~> parseJson",
+				"parseJson foldDown(unroll(nested_json),",
+				"     mapColumn(",
+				"          value,",
+				"          Id = nested_json.Id,",
+				"          Title = nested_json.Title,",
+				"          Overview = nested_json.Overview,",
+				"          Tagline = nested_json.Tagline,",
+				"          Budget = nested_json.Budget,",
+				"          Revenue = nested_json.Revenue,",
+				"          ImdbUrl = nested_json.ImdbUrl,",
+				"          TmdbUrl = nested_json.TmdbUrl,",
+				"          PosterUrl = nested_json.PosterUrl,",
+				"          BackdropUrl = nested_json.BackdropUrl,",
+				"          OriginalLanguage = nested_json.OriginalLanguage,",
+				"          ReleaseDate = nested_json.ReleaseDate,",
+				"          RunTime = nested_json.RunTime,",
+				"          Price = nested_json.Price,",
+				"          CreatedDate = nested_json.CreatedDate,",
+				"          genres = nested_json.genres",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flattenJson",
+				"filterStatus select(mapColumn(",
+				"          value",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"flattenJson derive(genre_id = genres.id,",
+				"          original_language_id = 1) ~> addForeignKeys",
+				"addForeignKeys select(mapColumn(",
+				"          value,",
+				"          Id,",
+				"          Title,",
+				"          Overview,",
+				"          Tagline,",
+				"          Budget,",
+				"          Revenue,",
+				"          ImdbUrl,",
+				"          TmdbUrl,",
+				"          PosterUrl,",
+				"          BackdropUrl,",
+				"          original_language_id,",
+				"          ReleaseDate,",
+				"          RunTime,",
+				"          Price,",
+				"          CreatedDate,",
+				"          genre_id",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> silver"
+			]
+		}
+	}
+}

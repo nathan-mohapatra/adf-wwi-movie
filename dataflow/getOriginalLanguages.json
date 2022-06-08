@@ -1,0 +1,77 @@
+{
+	"name": "getOriginalLanguages",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronze_movie",
+						"type": "DatasetReference"
+					},
+					"name": "bronze"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "original_languages",
+						"type": "DatasetReference"
+					},
+					"name": "originalLanguages"
+				}
+			],
+			"transformations": [
+				{
+					"name": "addOriginalLanguages"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "DistinctRows"
+				},
+				{
+					"name": "select2"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          value as string,",
+				"          datasource as string,",
+				"          ingestdate as date,",
+				"          ingesttime as timestamp,",
+				"          status as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> bronze",
+				"bronze derive(id = 1,",
+				"          language = \"English\") ~> addOriginalLanguages",
+				"addOriginalLanguages select(mapColumn(",
+				"          id,",
+				"          language",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 aggregate(groupBy(mycols = sha2(256,columns())),",
+				"     each(match(true()), $$ = first($$))) ~> DistinctRows",
+				"DistinctRows select(mapColumn(",
+				"          id,",
+				"          language",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> originalLanguages"
+			]
+		}
+	}
+}
