@@ -274,7 +274,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "movie",
+						"folderPath": "movies",
 						"fileSystem": "silver-movie"
 					},
 					"compressionCodec": "snappy"
