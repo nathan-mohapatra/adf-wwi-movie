@@ -100,7 +100,7 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select1",
-				"flattenJson derive(genre_id = genres.id,",
+				"flattenJson derive(genre_id = toString(genres.id),",
 				"          original_language_id = 1) ~> addForeignKeys",
 				"addForeignKeys select(mapColumn(",
 				"          value,",
