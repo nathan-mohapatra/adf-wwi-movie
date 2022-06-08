@@ -83,6 +83,56 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/genres')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "genres",
+						"fileSystem": "silver-movie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/original_languages')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "original-languages",
+						"fileSystem": "silver-movie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/raw_movie')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -208,6 +258,382 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/silver_movie')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileSystem": "silver-movie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/bronzeToSilver')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "bronze_movie",
+								"type": "DatasetReference"
+							},
+							"name": "bronze"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "silver_movie",
+								"type": "DatasetReference"
+							},
+							"name": "silver"
+						}
+					],
+					"transformations": [
+						{
+							"name": "filterStatus"
+						},
+						{
+							"name": "parseJson"
+						},
+						{
+							"name": "flattenJson"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "addForeignKeys"
+						},
+						{
+							"name": "select2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          value as string,",
+						"          datasource as string,",
+						"          ingestdate as date,",
+						"          ingesttime as timestamp,",
+						"          status as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> bronze",
+						"bronze filter(status == \"new\") ~> filterStatus",
+						"select1 parse(nested_json = value ? (Id as integer,",
+						"     Title as string,",
+						"     Overview as string,",
+						"     Tagline as string,",
+						"     Budget as integer,",
+						"     Revenue as integer,",
+						"     ImdbUrl as string,",
+						"     TmdbUrl as string,",
+						"     PosterUrl as string,",
+						"     BackdropUrl as string,",
+						"     OriginalLanguage as string,",
+						"     ReleaseDate as string,",
+						"     RunTime as integer,",
+						"     Price as integer,",
+						"     CreatedDate as string,",
+						"     genres as (id as integer,",
+						"     name as string)[])[],",
+						"     format: 'json',",
+						"     documentForm: 'documentPerLine') ~> parseJson",
+						"parseJson foldDown(unroll(nested_json),",
+						"     mapColumn(",
+						"          value,",
+						"          Id = nested_json.Id,",
+						"          Title = nested_json.Title,",
+						"          Overview = nested_json.Overview,",
+						"          Tagline = nested_json.Tagline,",
+						"          Budget = nested_json.Budget,",
+						"          Revenue = nested_json.Revenue,",
+						"          ImdbUrl = nested_json.ImdbUrl,",
+						"          TmdbUrl = nested_json.TmdbUrl,",
+						"          PosterUrl = nested_json.PosterUrl,",
+						"          BackdropUrl = nested_json.BackdropUrl,",
+						"          OriginalLanguage = nested_json.OriginalLanguage,",
+						"          ReleaseDate = nested_json.ReleaseDate,",
+						"          RunTime = nested_json.RunTime,",
+						"          Price = nested_json.Price,",
+						"          CreatedDate = nested_json.CreatedDate,",
+						"          genres = nested_json.genres",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> flattenJson",
+						"filterStatus select(mapColumn(",
+						"          value",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"flattenJson derive(genre_id = genres.id,",
+						"          original_language_id = 1) ~> addForeignKeys",
+						"addForeignKeys select(mapColumn(",
+						"          value,",
+						"          Id,",
+						"          Title,",
+						"          Overview,",
+						"          Tagline,",
+						"          Budget,",
+						"          Revenue,",
+						"          ImdbUrl,",
+						"          TmdbUrl,",
+						"          PosterUrl,",
+						"          BackdropUrl,",
+						"          original_language_id,",
+						"          ReleaseDate,",
+						"          RunTime,",
+						"          Price,",
+						"          CreatedDate,",
+						"          genre_id",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"select2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> silver"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/bronze_movie')]",
+				"[concat(variables('factoryId'), '/datasets/silver_movie')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/getGenres')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "bronze_movie",
+								"type": "DatasetReference"
+							},
+							"name": "bronze"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "genres",
+								"type": "DatasetReference"
+							},
+							"name": "genres"
+						}
+					],
+					"transformations": [
+						{
+							"name": "parse"
+						},
+						{
+							"name": "flattenJson"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "flattenGenres"
+						},
+						{
+							"name": "DistinctRows"
+						},
+						{
+							"name": "filterNull"
+						},
+						{
+							"name": "select2"
+						},
+						{
+							"name": "sort"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          value as string,",
+						"          datasource as string,",
+						"          ingestdate as date,",
+						"          ingesttime as timestamp,",
+						"          status as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> bronze",
+						"select1 parse(nested_json = value ? (Id as integer,",
+						"     Title as string,",
+						"     Overview as string,",
+						"     Tagline as string,",
+						"     Budget as integer,",
+						"     Revenue as integer,",
+						"     ImdbUrl as string,",
+						"     TmdbUrl as string,",
+						"     PosterUrl as string,",
+						"     BackdropUrl as string,",
+						"     OriginalLanguage as string,",
+						"     ReleaseDate as string,",
+						"     RunTime as integer,",
+						"     Price as integer,",
+						"     CreatedDate as string,",
+						"     genres as (id as integer,",
+						"     name as string)[])[],",
+						"     format: 'json',",
+						"     documentForm: 'documentPerLine') ~> parse",
+						"parse foldDown(unroll(nested_json),",
+						"     mapColumn(",
+						"          genres = nested_json.genres",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> flattenJson",
+						"bronze select(mapColumn(",
+						"          value",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"flattenJson foldDown(unroll(genres),",
+						"     mapColumn(",
+						"          id = genres.id,",
+						"          name = genres.name",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> flattenGenres",
+						"flattenGenres aggregate(groupBy(mycols = sha2(256,columns())),",
+						"     each(match(true()), $$ = first($$))) ~> DistinctRows",
+						"DistinctRows filter(name != \"\") ~> filterNull",
+						"filterNull select(mapColumn(",
+						"          id,",
+						"          name",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"select2 sort(asc(id, true)) ~> sort",
+						"sort sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> genres"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/bronze_movie')]",
+				"[concat(variables('factoryId'), '/datasets/genres')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/getOriginalLanguages')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "bronze_movie",
+								"type": "DatasetReference"
+							},
+							"name": "bronze"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "original_languages",
+								"type": "DatasetReference"
+							},
+							"name": "originalLanguages"
+						}
+					],
+					"transformations": [
+						{
+							"name": "addOriginalLanguages"
+						},
+						{
+							"name": "select1"
+						},
+						{
+							"name": "DistinctRows"
+						},
+						{
+							"name": "select2"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          value as string,",
+						"          datasource as string,",
+						"          ingestdate as date,",
+						"          ingesttime as timestamp,",
+						"          status as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> bronze",
+						"bronze derive(id = 1,",
+						"          language = \"English\") ~> addOriginalLanguages",
+						"addOriginalLanguages select(mapColumn(",
+						"          id,",
+						"          language",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select1",
+						"select1 aggregate(groupBy(mycols = sha2(256,columns())),",
+						"     each(match(true()), $$ = first($$))) ~> DistinctRows",
+						"DistinctRows select(mapColumn(",
+						"          id,",
+						"          language",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select2",
+						"select2 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'parquet',",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> originalLanguages"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/bronze_movie')]",
+				"[concat(variables('factoryId'), '/datasets/original_languages')]"
 			]
 		},
 		{
@@ -383,6 +809,117 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "getGenres",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "rawToBronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "getGenres",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"bronze": {},
+									"genres": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "getOriginalLanguages",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "getGenres",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "getOriginalLanguages",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"bronze": {},
+									"originalLanguages": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "bronzeToSilver",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "getOriginalLanguages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "bronzeToSilver",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"bronze": {},
+									"silver": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
 					}
 				],
 				"policy": {
@@ -394,7 +931,10 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/raw_movie_source')]",
 				"[concat(variables('factoryId'), '/datasets/raw_movie')]",
-				"[concat(variables('factoryId'), '/dataflows/rawToBronze')]"
+				"[concat(variables('factoryId'), '/dataflows/rawToBronze')]",
+				"[concat(variables('factoryId'), '/dataflows/getGenres')]",
+				"[concat(variables('factoryId'), '/dataflows/getOriginalLanguages')]",
+				"[concat(variables('factoryId'), '/dataflows/bronzeToSilver')]"
 			]
 		},
 		{
