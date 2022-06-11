@@ -279,7 +279,76 @@
 					},
 					"compressionCodec": "snappy"
 				},
-				"schema": []
+				"schema": [
+					{
+						"name": "value",
+						"type": "UTF8"
+					},
+					{
+						"name": "movie_id",
+						"type": "INT32"
+					},
+					{
+						"name": "title",
+						"type": "UTF8"
+					},
+					{
+						"name": "overview",
+						"type": "UTF8"
+					},
+					{
+						"name": "tagline",
+						"type": "UTF8"
+					},
+					{
+						"name": "budget",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "revenue",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "imdb_url",
+						"type": "UTF8"
+					},
+					{
+						"name": "tmdb_url",
+						"type": "UTF8"
+					},
+					{
+						"name": "poster_url",
+						"type": "UTF8"
+					},
+					{
+						"name": "backdrop_url",
+						"type": "UTF8"
+					},
+					{
+						"name": "original_language_id",
+						"type": "INT32"
+					},
+					{
+						"name": "release_date",
+						"type": "DATE"
+					},
+					{
+						"name": "runtime",
+						"type": "INT32"
+					},
+					{
+						"name": "price",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "created_date",
+						"type": "DATE"
+					},
+					{
+						"name": "genre_id",
+						"type": "UTF8"
+					}
+				]
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
@@ -603,6 +672,25 @@
 						"selectLoaded, selectQuarantined union(byName: true)~> union",
 						"silverClean sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
+						"     input(",
+						"          value as string,",
+						"          movie_id as integer,",
+						"          title as string,",
+						"          overview as string,",
+						"          tagline as string,",
+						"          budget as double,",
+						"          revenue as double,",
+						"          imdb_url as string,",
+						"          tmdb_url as string,",
+						"          poster_url as string,",
+						"          backdrop_url as string,",
+						"          original_language_id as integer,",
+						"          release_date as date,",
+						"          runtime as integer,",
+						"          price as double,",
+						"          created_date as date,",
+						"          genre_id as string",
+						"     ),",
 						"     format: 'parquet',",
 						"     umask: 0022,",
 						"     preCommands: [],",
@@ -857,6 +945,25 @@
 						"unionRepaired, silver union(byName: true)~> unionSilver",
 						"unionSilver sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
+						"     input(",
+						"          value as string,",
+						"          movie_id as integer,",
+						"          title as string,",
+						"          overview as string,",
+						"          tagline as string,",
+						"          budget as double,",
+						"          revenue as double,",
+						"          imdb_url as string,",
+						"          tmdb_url as string,",
+						"          poster_url as string,",
+						"          backdrop_url as string,",
+						"          original_language_id as integer,",
+						"          release_date as date,",
+						"          runtime as integer,",
+						"          price as double,",
+						"          created_date as date,",
+						"          genre_id as string",
+						"     ),",
 						"     format: 'parquet',",
 						"     truncate: true,",
 						"     umask: 0022,",
