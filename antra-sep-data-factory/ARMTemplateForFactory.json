@@ -205,7 +205,8 @@
 									"bronze": {},
 									"silver": {},
 									"genres": {},
-									"originalLanguages": {}
+									"originalLanguages": {},
+									"updateBronze": {}
 								}
 							},
 							"staging": {},
@@ -532,6 +533,13 @@
 								"type": "DatasetReference"
 							},
 							"name": "originalLanguages"
+						},
+						{
+							"dataset": {
+								"referenceName": "bronze_movie",
+								"type": "DatasetReference"
+							},
+							"name": "updateBronze"
 						}
 					],
 					"transformations": [
@@ -588,6 +596,39 @@
 						},
 						{
 							"name": "originalLanguagesSelect2"
+						},
+						{
+							"name": "distinctRaw"
+						},
+						{
+							"name": "silverClean"
+						},
+						{
+							"name": "filterClean"
+						},
+						{
+							"name": "filterQuarantine"
+						},
+						{
+							"name": "joinLoaded"
+						},
+						{
+							"name": "statusLoaded"
+						},
+						{
+							"name": "selectLoaded"
+						},
+						{
+							"name": "joinQuarantined"
+						},
+						{
+							"name": "statusQuarantined"
+						},
+						{
+							"name": "selectQuarantined"
+						},
+						{
+							"name": "union"
 						}
 					],
 					"scriptLines": [
@@ -653,21 +694,21 @@
 						"          original_language_id = 1) ~> addForeignKeys",
 						"addForeignKeys select(mapColumn(",
 						"          value,",
-						"          Id,",
-						"          Title,",
-						"          Overview,",
-						"          Tagline,",
-						"          Budget,",
-						"          Revenue,",
-						"          ImdbUrl,",
-						"          TmdbUrl,",
-						"          PosterUrl,",
-						"          BackdropUrl,",
+						"          movie_id = Id,",
+						"          title = Title,",
+						"          overview = Overview,",
+						"          tagline = Tagline,",
+						"          budget = Budget,",
+						"          revenue = Revenue,",
+						"          imdb_url = ImdbUrl,",
+						"          tmdb_url = TmdbUrl,",
+						"          poster_url = PosterUrl,",
+						"          backdrop_url = BackdropUrl,",
 						"          original_language_id,",
-						"          ReleaseDate,",
-						"          RunTime,",
-						"          Price,",
-						"          CreatedDate,",
+						"          release_date = ReleaseDate,",
+						"          runtime = RunTime,",
+						"          price = Price,",
+						"          created_date = CreatedDate,",
 						"          genre_id",
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
@@ -735,7 +776,39 @@
 						"     ),",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> originalLanguagesSelect2",
-						"select2 sink(allowSchemaDrift: true,",
+						"select2 aggregate(groupBy(value),",
+						"     each(match(name!=\"value\"), $$ = first($$))) ~> distinctRaw",
+						"distinctRaw filter(runtime >= 0 && budget >= 1000000) ~> silverClean",
+						"distinctRaw filter(runtime < 0 || budget < 1000000) ~> filterClean",
+						"distinctRaw filter(runtime >= 0 && budget >= 1000000) ~> filterQuarantine",
+						"filterQuarantine, bronze join(distinctRaw@value == bronze@value,",
+						"     joinType:'inner',",
+						"     broadcast: 'auto')~> joinLoaded",
+						"joinLoaded derive(status = \"loaded\") ~> statusLoaded",
+						"statusLoaded select(mapColumn(",
+						"          value = bronze@value,",
+						"          datasource,",
+						"          ingestdate,",
+						"          ingesttime,",
+						"          status",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectLoaded",
+						"filterClean, bronze join(distinctRaw@value == bronze@value,",
+						"     joinType:'inner',",
+						"     broadcast: 'auto')~> joinQuarantined",
+						"joinQuarantined derive(status = \"quarantined\") ~> statusQuarantined",
+						"statusQuarantined select(mapColumn(",
+						"          value = bronze@value,",
+						"          datasource,",
+						"          ingestdate,",
+						"          ingesttime,",
+						"          status",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectQuarantined",
+						"selectLoaded, selectQuarantined union(byName: true)~> union",
+						"silverClean sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     format: 'parquet',",
 						"     umask: 0022,",
@@ -758,7 +831,23 @@
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true) ~> originalLanguages"
+						"     skipDuplicateMapOutputs: true) ~> originalLanguages",
+						"union sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          value as string,",
+						"          datasource as string,",
+						"          ingestdate as date,",
+						"          ingesttime as timestamp,",
+						"          status as string",
+						"     ),",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> updateBronze"
 					]
 				}
 			},
