@@ -365,8 +365,9 @@
 				"          status as string",
 				"     ),",
 				"     format: 'parquet',",
+				"     truncate: true,",
 				"     umask: 0022,",
-				"     preCommands: ['rm ./*'],",
+				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> updateBronze"

@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "quarantinedBronzeToSilver",
+				"name": "silverUpdate",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "quarantinedBronzeToSilver",
+						"referenceName": "silverUpdate",
 						"type": "DataFlowReference"
 					},
 					"compute": {
