@@ -15,6 +15,27 @@
 			},
 			"compressionCodec": "snappy"
 		},
-		"schema": []
+		"schema": [
+			{
+				"name": "value",
+				"type": "UTF8"
+			},
+			{
+				"name": "datasource",
+				"type": "UTF8"
+			},
+			{
+				"name": "ingestdate",
+				"type": "DATE"
+			},
+			{
+				"name": "ingesttime",
+				"type": "INT96"
+			},
+			{
+				"name": "status",
+				"type": "UTF8"
+			}
+		]
 	}
 }
