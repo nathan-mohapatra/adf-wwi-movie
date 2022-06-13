@@ -365,7 +365,6 @@
 				"          status as string",
 				"     ),",
 				"     format: 'parquet',",
-				"     truncate: true,",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
