@@ -693,7 +693,7 @@
 						"     ),",
 						"     format: 'parquet',",
 						"     umask: 0022,",
-						"     preCommands: [],",
+						"     preCommands: ['rm -r /movies'],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> silver",
@@ -724,7 +724,7 @@
 						"     ),",
 						"     format: 'parquet',",
 						"     umask: 0022,",
-						"     preCommands: [],",
+						"     preCommands: ['rm -r'],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> updateBronze"
@@ -805,7 +805,7 @@
 						"     ),",
 						"     format: 'parquet',",
 						"     umask: 0022,",
-						"     preCommands: [],",
+						"     preCommands: ['rm -r'],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true) ~> bronze"
