@@ -70,22 +70,13 @@
 					"name": "unionRepaired"
 				},
 				{
-					"name": "joinLoaded"
+					"name": "unionSilver"
+				},
+				{
+					"name": "distinctRaw"
 				},
 				{
 					"name": "statusLoaded"
-				},
-				{
-					"name": "selectLoaded"
-				},
-				{
-					"name": "filterQuarantined"
-				},
-				{
-					"name": "unionLoaded"
-				},
-				{
-					"name": "unionSilver"
 				}
 			],
 			"scriptLines": [
@@ -180,29 +171,16 @@
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
 				"select2 filter(budget < 1000000) ~> filterBudget",
-				"select2 filter(runtime < 0) ~> filterRuntime",
+				"select2 filter(runtime < 0 && budget >= 1000000) ~> filterRuntime",
 				"filterRuntime derive(runtime = abs(runtime)) ~> repairRuntime",
-				"filterBudget derive(budget = 1000000.00) ~> repairBudget",
+				"filterBudget derive(budget = 1000000.00,",
+				"          runtime = abs(runtime)) ~> repairBudget",
 				"repairRuntime, repairBudget union(byName: true)~> unionRepaired",
-				"unionRepaired, bronze join(unionRepaired@value == bronze@value,",
-				"     joinType:'inner',",
-				"     matchType:'exact',",
-				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> joinLoaded",
-				"joinLoaded derive(status = \"loaded\") ~> statusLoaded",
-				"statusLoaded select(mapColumn(",
-				"          value = bronze@value,",
-				"          datasource,",
-				"          ingestdate,",
-				"          ingesttime,",
-				"          status",
-				"     ),",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> selectLoaded",
-				"bronze filter(status == \"loaded\") ~> filterQuarantined",
-				"selectLoaded, filterQuarantined union(byName: true)~> unionLoaded",
 				"unionRepaired, silver union(byName: true)~> unionSilver",
-				"unionSilver sink(allowSchemaDrift: true,",
+				"unionSilver aggregate(groupBy(value),",
+				"     each(match(name != \"value\"), $$ = first($$))) ~> distinctRaw",
+				"bronze derive(status = \"loaded\") ~> statusLoaded",
+				"distinctRaw sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          value as string,",
@@ -230,7 +208,7 @@
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> updateSilver",
-				"unionLoaded sink(allowSchemaDrift: true,",
+				"statusLoaded sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
 				"          value as string,",
