@@ -142,11 +142,27 @@
 						}
 					},
 					{
+						"name": "Wait",
+						"type": "Wait",
+						"dependsOn": [
+							{
+								"activity": "silverUpdate",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 69
+						}
+					},
+					{
 						"name": "bronzeUpdate",
 						"type": "ExecuteDataFlow",
 						"dependsOn": [
 							{
-								"activity": "silverUpdate",
+								"activity": "Wait",
 								"dependencyConditions": [
 									"Succeeded"
 								]
