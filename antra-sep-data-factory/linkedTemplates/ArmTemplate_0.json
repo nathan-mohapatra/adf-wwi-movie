@@ -356,6 +356,31 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/silver_movie_clean')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "clean-movies",
+						"fileSystem": "silver-movie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/bronzeToSilver')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -915,7 +940,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "silver_movie",
+								"referenceName": "silver_movie_clean",
 								"type": "DatasetReference"
 							},
 							"name": "updateSilver"
@@ -1064,25 +1089,6 @@
 						"     each(match(name!=\"value\"), $$ = first($$))) ~> distinctRaw",
 						"distinctRaw sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          value as string,",
-						"          movie_id as integer,",
-						"          title as string,",
-						"          overview as string,",
-						"          tagline as string,",
-						"          budget as double,",
-						"          revenue as double,",
-						"          imdb_url as string,",
-						"          tmdb_url as string,",
-						"          poster_url as string,",
-						"          backdrop_url as string,",
-						"          original_language_id as integer,",
-						"          release_date as date,",
-						"          runtime as integer,",
-						"          price as double,",
-						"          created_date as date,",
-						"          genre_id as string",
-						"     ),",
 						"     format: 'parquet',",
 						"     truncate: true,",
 						"     umask: 0022,",
@@ -1095,7 +1101,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/bronze_movie')]",
-				"[concat(variables('factoryId'), '/datasets/silver_movie')]"
+				"[concat(variables('factoryId'), '/datasets/silver_movie')]",
+				"[concat(variables('factoryId'), '/datasets/silver_movie_clean')]"
 			]
 		},
 		{
