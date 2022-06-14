@@ -22,10 +22,17 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "silver_movie_clean",
+						"referenceName": "silver_movie",
 						"type": "DatasetReference"
 					},
 					"name": "updateSilver"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronze_movie",
+						"type": "DatasetReference"
+					},
+					"name": "updateBronze"
 				}
 			],
 			"transformations": [
@@ -67,6 +74,9 @@
 				},
 				{
 					"name": "distinctRaw"
+				},
+				{
+					"name": "statusLoaded"
 				}
 			],
 			"scriptLines": [
@@ -80,7 +90,6 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     purgeFiles: true,",
 				"     format: 'parquet') ~> bronze",
 				"source(output(",
 				"          value as string,",
@@ -104,7 +113,6 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     purgeFiles: true,",
 				"     format: 'parquet') ~> silver",
 				"bronze filter(status == \"quarantined\") ~> filterLoaded",
 				"filterLoaded select(mapColumn(",
@@ -169,15 +177,51 @@
 				"unionRepaired, silver union(byName: true)~> unionSilver",
 				"unionSilver aggregate(groupBy(value),",
 				"     each(match(name!=\"value\"), $$ = first($$))) ~> distinctRaw",
+				"bronze derive(status = \"loaded\") ~> statusLoaded",
 				"distinctRaw sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     input(",
+				"          value as string,",
+				"          movie_id as integer,",
+				"          title as string,",
+				"          overview as string,",
+				"          tagline as string,",
+				"          budget as double,",
+				"          revenue as double,",
+				"          imdb_url as string,",
+				"          tmdb_url as string,",
+				"          poster_url as string,",
+				"          backdrop_url as string,",
+				"          original_language_id as integer,",
+				"          release_date as date,",
+				"          runtime as integer,",
+				"          price as double,",
+				"          created_date as date,",
+				"          genre_id as string",
+				"     ),",
 				"     format: 'parquet',",
 				"     truncate: true,",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> updateSilver"
+				"     skipDuplicateMapOutputs: true) ~> updateSilver",
+				"statusLoaded sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          value as string,",
+				"          datasource as string,",
+				"          ingestdate as date,",
+				"          ingesttime as timestamp,",
+				"          status as string",
+				"     ),",
+				"     format: 'parquet',",
+				"     truncate: true,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> updateBronze"
 			]
 		}
 	}
