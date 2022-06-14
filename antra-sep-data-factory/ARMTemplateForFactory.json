@@ -1317,7 +1317,7 @@
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     saveOrder: 2) ~> updateSilver",
+						"     saveOrder: 1) ~> updateSilver",
 						"statusLoaded sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
