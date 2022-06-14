@@ -130,7 +130,43 @@
 								"datasetParameters": {
 									"bronze": {},
 									"silver": {},
-									"updateSilver": {},
+									"updateSilver": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "bronzeUpdate",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "silverUpdate",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "bronzeUpdate",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"bronze": {},
 									"updateBronze": {}
 								}
 							},
@@ -150,7 +186,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/silverUpdate')]"
+				"[concat(variables('factoryId'), '/dataflows/silverUpdate')]",
+				"[concat(variables('factoryId'), '/dataflows/bronzeUpdate')]"
 			]
 		},
 		{
@@ -1026,6 +1063,72 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/bronzeUpdate')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "bronze_movie",
+								"type": "DatasetReference"
+							},
+							"name": "bronze"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "bronze_movie",
+								"type": "DatasetReference"
+							},
+							"name": "updateBronze"
+						}
+					],
+					"transformations": [
+						{
+							"name": "statusLoaded"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          value as string,",
+						"          datasource as string,",
+						"          ingestdate as date,",
+						"          ingesttime as timestamp,",
+						"          status as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> bronze",
+						"bronze derive(status = \"loaded\") ~> statusLoaded",
+						"statusLoaded sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          value as string,",
+						"          datasource as string,",
+						"          ingestdate as date,",
+						"          ingesttime as timestamp,",
+						"          status as string",
+						"     ),",
+						"     format: 'parquet',",
+						"     truncate: true,",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> updateBronze"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/bronze_movie')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/rawToBronze')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -1135,13 +1238,6 @@
 								"type": "DatasetReference"
 							},
 							"name": "updateSilver"
-						},
-						{
-							"dataset": {
-								"referenceName": "bronze_movie",
-								"type": "DatasetReference"
-							},
-							"name": "updateBronze"
 						}
 					],
 					"transformations": [
@@ -1183,9 +1279,6 @@
 						},
 						{
 							"name": "distinctRaw"
-						},
-						{
-							"name": "statusLoaded"
 						}
 					],
 					"scriptLines": [
@@ -1288,7 +1381,6 @@
 						"unionRepaired, silver union(byName: true)~> unionSilver",
 						"unionSilver aggregate(groupBy(value),",
 						"     each(match(name!=\"value\"), $$ = first($$))) ~> distinctRaw",
-						"bronze derive(status = \"loaded\") ~> statusLoaded",
 						"distinctRaw sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
 						"     input(",
@@ -1316,25 +1408,7 @@
 						"     preCommands: [],",
 						"     postCommands: [],",
 						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     saveOrder: 1) ~> updateSilver",
-						"statusLoaded sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          value as string,",
-						"          datasource as string,",
-						"          ingestdate as date,",
-						"          ingesttime as timestamp,",
-						"          status as string",
-						"     ),",
-						"     format: 'parquet',",
-						"     truncate: true,",
-						"     umask: 0022,",
-						"     preCommands: [],",
-						"     postCommands: [],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     saveOrder: 1) ~> updateBronze"
+						"     skipDuplicateMapOutputs: true) ~> updateSilver"
 					]
 				}
 			},
