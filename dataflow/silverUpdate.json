@@ -22,7 +22,7 @@
 			"sinks": [
 				{
 					"dataset": {
-						"referenceName": "silver_movie",
+						"referenceName": "silver_movie_clean",
 						"type": "DatasetReference"
 					},
 					"name": "updateSilver"
@@ -169,25 +169,6 @@
 				"     each(match(name!=\"value\"), $$ = first($$))) ~> distinctRaw",
 				"distinctRaw sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          value as string,",
-				"          movie_id as integer,",
-				"          title as string,",
-				"          overview as string,",
-				"          tagline as string,",
-				"          budget as double,",
-				"          revenue as double,",
-				"          imdb_url as string,",
-				"          tmdb_url as string,",
-				"          poster_url as string,",
-				"          backdrop_url as string,",
-				"          original_language_id as integer,",
-				"          release_date as date,",
-				"          runtime as integer,",
-				"          price as double,",
-				"          created_date as date,",
-				"          genre_id as string",
-				"     ),",
 				"     format: 'parquet',",
 				"     truncate: true,",
 				"     umask: 0022,",
