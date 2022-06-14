@@ -14,6 +14,10 @@
 			],
 			"sinks": [
 				{
+					"dataset": {
+						"referenceName": "bronze_movie",
+						"type": "DatasetReference"
+					},
 					"name": "bronze"
 				}
 			],
@@ -50,15 +54,19 @@
 				"          status = \"new\") ~> addMetadata",
 				"addMetadata sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     truncate: true,",
-				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true,",
-				"     store: 'cache',",
-				"     format: 'inline',",
-				"     output: false,",
-				"     saveOrder: 1,",
+				"     input(",
+				"          value as string,",
+				"          datasource as string,",
+				"          ingestdate as date,",
+				"          ingesttime as timestamp,",
+				"          status as string",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
 				"     preCommands: [],",
-				"     postCommands: []) ~> bronze"
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> bronze"
 			]
 		}
 	}

@@ -14,6 +14,10 @@
 			],
 			"sinks": [
 				{
+					"dataset": {
+						"referenceName": "silver_movie",
+						"type": "DatasetReference"
+					},
 					"name": "silver"
 				},
 				{
@@ -31,6 +35,10 @@
 					"name": "originalLanguages"
 				},
 				{
+					"dataset": {
+						"referenceName": "bronze_movie",
+						"type": "DatasetReference"
+					},
 					"name": "updateBronze"
 				}
 			],
@@ -134,6 +142,7 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
+				"     purgeFiles: true,",
 				"     format: 'parquet') ~> bronze",
 				"bronze filter(status == \"new\") ~> filterStatus",
 				"select1 parse(nested_json = value ? (Id as integer,",
@@ -306,15 +315,32 @@
 				"selectLoaded, selectQuarantined union(byName: true)~> union",
 				"silverClean sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     truncate: true,",
+				"     input(",
+				"          value as string,",
+				"          movie_id as integer,",
+				"          title as string,",
+				"          overview as string,",
+				"          tagline as string,",
+				"          budget as double,",
+				"          revenue as double,",
+				"          imdb_url as string,",
+				"          tmdb_url as string,",
+				"          poster_url as string,",
+				"          backdrop_url as string,",
+				"          original_language_id as integer,",
+				"          release_date as date,",
+				"          runtime as integer,",
+				"          price as double,",
+				"          created_date as date,",
+				"          genre_id as string",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     store: 'cache',",
-				"     format: 'inline',",
-				"     output: false,",
-				"     saveOrder: 1,",
-				"     preCommands: [],",
-				"     postCommands: []) ~> silver",
+				"     saveOrder: 1) ~> silver",
 				"sort sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
@@ -333,15 +359,20 @@
 				"     skipDuplicateMapOutputs: true) ~> originalLanguages",
 				"union sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     truncate: true,",
+				"     input(",
+				"          value as string,",
+				"          datasource as string,",
+				"          ingestdate as date,",
+				"          ingesttime as timestamp,",
+				"          status as string",
+				"     ),",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     store: 'cache',",
-				"     format: 'inline',",
-				"     output: false,",
-				"     saveOrder: 1,",
-				"     preCommands: [],",
-				"     postCommands: []) ~> updateBronze"
+				"     saveOrder: 1) ~> updateBronze"
 			]
 		}
 	}
