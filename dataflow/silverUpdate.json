@@ -178,7 +178,7 @@
 				"repairRuntime, repairBudget union(byName: true)~> unionRepaired",
 				"unionRepaired, silver union(byName: true)~> unionSilver",
 				"unionSilver aggregate(groupBy(value),",
-				"     each(match(name != \"value\"), $$ = first($$))) ~> distinctRaw",
+				"     each(match(name!=\"value\"), $$ = first($$))) ~> distinctRaw",
 				"bronze derive(status = \"loaded\") ~> statusLoaded",
 				"distinctRaw sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
@@ -207,7 +207,8 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> updateSilver",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1) ~> updateSilver",
 				"statusLoaded sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -223,7 +224,8 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> updateBronze"
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 2) ~> updateBronze"
 			]
 		}
 	}
