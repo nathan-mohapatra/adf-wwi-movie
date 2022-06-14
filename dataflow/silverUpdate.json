@@ -208,7 +208,7 @@
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     saveOrder: 1) ~> updateSilver",
+				"     saveOrder: 2) ~> updateSilver",
 				"statusLoaded sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -225,7 +225,7 @@
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     saveOrder: 2) ~> updateBronze"
+				"     saveOrder: 1) ~> updateBronze"
 			]
 		}
 	}
