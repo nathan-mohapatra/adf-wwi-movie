@@ -16,53 +16,11 @@
 				}
 			},
 			{
-				"name": "validation_bronze",
-				"type": "Validation",
-				"dependsOn": [
-					{
-						"activity": "raw_to_bronze_to_silver",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "bronze_movie",
-						"type": "DatasetReference"
-					},
-					"timeout": "7.00:00:00",
-					"sleep": 10
-				}
-			},
-			{
-				"name": "validation_silver",
-				"type": "Validation",
-				"dependsOn": [
-					{
-						"activity": "validation_bronze",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "silver_movie",
-						"type": "DatasetReference"
-					},
-					"timeout": "7.00:00:00",
-					"sleep": 10
-				}
-			},
-			{
 				"name": "quarantined_bronze_to_silver",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "validation_silver",
+						"activity": "raw_to_bronze_to_silver",
 						"dependencyConditions": [
 							"Succeeded"
 						]
