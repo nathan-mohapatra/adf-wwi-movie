@@ -58,8 +58,8 @@
 				}
 			},
 			{
-				"name": "silverUpdate",
-				"type": "ExecuteDataFlow",
+				"name": "quarantined_bronze_to_silver",
+				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
 						"activity": "validation_silver",
@@ -68,24 +68,13 @@
 						]
 					}
 				],
-				"policy": {
-					"timeout": "1.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataflow": {
-						"referenceName": "silverUpdate",
-						"type": "DataFlowReference"
+					"pipeline": {
+						"referenceName": "quarantined_bronze_to_silver",
+						"type": "PipelineReference"
 					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
+					"waitOnCompletion": true
 				}
 			}
 		],
