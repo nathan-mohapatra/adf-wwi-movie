@@ -81,28 +81,7 @@
 					},
 					"compressionCodec": "snappy"
 				},
-				"schema": [
-					{
-						"name": "value",
-						"type": "UTF8"
-					},
-					{
-						"name": "datasource",
-						"type": "UTF8"
-					},
-					{
-						"name": "ingestdate",
-						"type": "DATE"
-					},
-					{
-						"name": "ingesttime",
-						"type": "INT96"
-					},
-					{
-						"name": "status",
-						"type": "UTF8"
-					}
-				]
+				"schema": []
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
@@ -741,13 +720,6 @@
 						"     skipDuplicateMapOutputs: true) ~> originalLanguages",
 						"union sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          value as string,",
-						"          datasource as string,",
-						"          ingestdate as date,",
-						"          ingesttime as timestamp,",
-						"          status as string",
-						"     ),",
 						"     format: 'parquet',",
 						"     truncate: true,",
 						"     umask: 0022,",
@@ -851,13 +823,6 @@
 						"          status = \"new\") ~> addMetadata",
 						"addMetadata sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          value as string,",
-						"          datasource as string,",
-						"          ingestdate as date,",
-						"          ingesttime as timestamp,",
-						"          status as string",
-						"     ),",
 						"     format: 'parquet',",
 						"     truncate: true,",
 						"     umask: 0022,",
