@@ -6,7 +6,7 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "bronze_movie",
+						"referenceName": "bronze_movie_tmp",
 						"type": "DatasetReference"
 					},
 					"name": "bronze"
@@ -29,14 +29,14 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "bronze_movie",
+						"referenceName": "bronze_movie_tmp",
 						"type": "DatasetReference"
 					},
 					"name": "updateBronze"
 				},
 				{
 					"dataset": {
-						"referenceName": "silver_movie",
+						"referenceName": "silver_movie_tmp",
 						"type": "DatasetReference"
 					},
 					"name": "silver"

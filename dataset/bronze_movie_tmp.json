@@ -1,5 +1,5 @@
 {
-	"name": "bronze_movie",
+	"name": "bronze_movie_tmp",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_AzureDataLakeStorage",
