@@ -72,8 +72,8 @@
 						}
 					},
 					{
-						"name": "quarantined_bronze_to_silver",
-						"type": "ExecutePipeline",
+						"name": "validation_bronze",
+						"type": "Validation",
 						"dependsOn": [
 							{
 								"activity": "raw_to_bronze_to_silver",
@@ -84,12 +84,74 @@
 						],
 						"userProperties": [],
 						"typeProperties": {
-							"pipeline": {
-								"referenceName": "quarantined_bronze_to_silver",
-								"type": "PipelineReference"
+							"dataset": {
+								"referenceName": "bronze_movie",
+								"type": "DatasetReference",
+								"parameters": {}
 							},
-							"waitOnCompletion": true,
-							"parameters": {}
+							"timeout": "7.00:00:00",
+							"sleep": 10
+						}
+					},
+					{
+						"name": "validation_silver",
+						"type": "Validation",
+						"dependsOn": [
+							{
+								"activity": "validation_bronze",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "silver_movie",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"timeout": "7.00:00:00",
+							"sleep": 10
+						}
+					},
+					{
+						"name": "silverUpdate",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "validation_silver",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "silverUpdate",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"bronze": {},
+									"silver": {},
+									"updateSilver": {},
+									"updateBronze": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
 						}
 					}
 				],
@@ -101,7 +163,9 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/raw_to_bronze_to_silver')]",
-				"[concat(variables('factoryId'), '/pipelines/quarantined_bronze_to_silver')]"
+				"[concat(variables('factoryId'), '/datasets/bronze_movie')]",
+				"[concat(variables('factoryId'), '/datasets/silver_movie')]",
+				"[concat(variables('factoryId'), '/dataflows/silverUpdate')]"
 			]
 		},
 		{
