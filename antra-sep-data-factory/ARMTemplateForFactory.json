@@ -141,6 +141,84 @@
 							},
 							"traceLevel": "Fine"
 						}
+					},
+					{
+						"name": "delete_bronze_tmp",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "silverUpdate",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "bronze_movie_tmp",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "ls_AzureDataLakeStorage",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"enableLogging": true,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
+					},
+					{
+						"name": "delete_silver_tmp",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "delete_bronze_tmp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "silver_movie_tmp",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"logStorageSettings": {
+								"linkedServiceName": {
+									"referenceName": "ls_AzureDataLakeStorage",
+									"type": "LinkedServiceReference"
+								}
+							},
+							"enableLogging": true,
+							"storeSettings": {
+								"type": "AzureBlobFSReadSettings",
+								"recursive": true,
+								"enablePartitionDiscovery": false
+							}
+						}
 					}
 				],
 				"policy": {
@@ -150,7 +228,10 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/silverUpdate')]"
+				"[concat(variables('factoryId'), '/dataflows/silverUpdate')]",
+				"[concat(variables('factoryId'), '/datasets/bronze_movie_tmp')]",
+				"[concat(variables('factoryId'), '/datasets/silver_movie_tmp')]",
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
 			]
 		},
 		{
@@ -304,6 +385,31 @@
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/bronze_movie')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "updated",
+						"fileSystem": "bronze-movie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/bronze_movie_tmp')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -540,6 +646,31 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"folderPath": "updated",
+						"fileSystem": "silver-movie"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/silver_movie_tmp')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
 						"folderPath": "movies",
 						"fileSystem": "silver-movie"
 					},
@@ -647,7 +778,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "bronze_movie",
+								"referenceName": "bronze_movie_tmp",
 								"type": "DatasetReference"
 							},
 							"name": "bronze"
@@ -670,14 +801,14 @@
 						},
 						{
 							"dataset": {
-								"referenceName": "bronze_movie",
+								"referenceName": "bronze_movie_tmp",
 								"type": "DatasetReference"
 							},
 							"name": "updateBronze"
 						},
 						{
 							"dataset": {
-								"referenceName": "silver_movie",
+								"referenceName": "silver_movie_tmp",
 								"type": "DatasetReference"
 							},
 							"name": "silver"
@@ -1019,10 +1150,10 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/bronze_movie')]",
+				"[concat(variables('factoryId'), '/datasets/bronze_movie_tmp')]",
 				"[concat(variables('factoryId'), '/datasets/genres')]",
 				"[concat(variables('factoryId'), '/datasets/original_languages')]",
-				"[concat(variables('factoryId'), '/datasets/silver_movie')]"
+				"[concat(variables('factoryId'), '/datasets/silver_movie_tmp')]"
 			]
 		},
 		{
@@ -1044,7 +1175,7 @@
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "bronze_movie",
+								"referenceName": "bronze_movie_tmp",
 								"type": "DatasetReference"
 							},
 							"name": "bronze"
@@ -1102,7 +1233,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/raw_movie')]",
-				"[concat(variables('factoryId'), '/datasets/bronze_movie')]"
+				"[concat(variables('factoryId'), '/datasets/bronze_movie_tmp')]"
 			]
 		},
 		{
@@ -1115,14 +1246,14 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "bronze_movie",
+								"referenceName": "bronze_movie_tmp",
 								"type": "DatasetReference"
 							},
 							"name": "bronze"
 						},
 						{
 							"dataset": {
-								"referenceName": "silver_movie",
+								"referenceName": "silver_movie_tmp",
 								"type": "DatasetReference"
 							},
 							"name": "silver"
@@ -1289,26 +1420,8 @@
 						"bronze derive(status = \"loaded\") ~> statusLoaded",
 						"distinctRaw sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          value as string,",
-						"          movie_id as integer,",
-						"          title as string,",
-						"          overview as string,",
-						"          tagline as string,",
-						"          budget as double,",
-						"          revenue as double,",
-						"          imdb_url as string,",
-						"          tmdb_url as string,",
-						"          poster_url as string,",
-						"          backdrop_url as string,",
-						"          original_language_id as integer,",
-						"          release_date as date,",
-						"          runtime as integer,",
-						"          price as double,",
-						"          created_date as date,",
-						"          genre_id as string",
-						"     ),",
 						"     format: 'parquet',",
+						"     truncate: true,",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -1316,14 +1429,8 @@
 						"     skipDuplicateMapOutputs: true) ~> updateSilver",
 						"statusLoaded sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          value as string,",
-						"          datasource as string,",
-						"          ingestdate as date,",
-						"          ingesttime as timestamp,",
-						"          status as string",
-						"     ),",
 						"     format: 'parquet',",
+						"     truncate: true,",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -1333,8 +1440,10 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/bronze_movie')]",
-				"[concat(variables('factoryId'), '/datasets/silver_movie')]"
+				"[concat(variables('factoryId'), '/datasets/bronze_movie_tmp')]",
+				"[concat(variables('factoryId'), '/datasets/silver_movie_tmp')]",
+				"[concat(variables('factoryId'), '/datasets/silver_movie')]",
+				"[concat(variables('factoryId'), '/datasets/bronze_movie')]"
 			]
 		}
 	]
