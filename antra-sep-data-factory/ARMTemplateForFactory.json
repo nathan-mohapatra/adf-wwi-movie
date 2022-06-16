@@ -72,55 +72,11 @@
 						}
 					},
 					{
-						"name": "validation_bronze",
-						"type": "Validation",
-						"dependsOn": [
-							{
-								"activity": "raw_to_bronze_to_silver",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "bronze_movie",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"timeout": "7.00:00:00",
-							"sleep": 10
-						}
-					},
-					{
-						"name": "validation_silver",
-						"type": "Validation",
-						"dependsOn": [
-							{
-								"activity": "validation_bronze",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "silver_movie",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"timeout": "7.00:00:00",
-							"sleep": 10
-						}
-					},
-					{
 						"name": "quarantined_bronze_to_silver",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "validation_silver",
+								"activity": "raw_to_bronze_to_silver",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -145,8 +101,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/raw_to_bronze_to_silver')]",
-				"[concat(variables('factoryId'), '/datasets/bronze_movie')]",
-				"[concat(variables('factoryId'), '/datasets/silver_movie')]",
 				"[concat(variables('factoryId'), '/pipelines/quarantined_bronze_to_silver')]"
 			]
 		},
@@ -1355,7 +1309,6 @@
 						"          genre_id as string",
 						"     ),",
 						"     format: 'parquet',",
-						"     truncate: true,",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
@@ -1371,7 +1324,6 @@
 						"          status as string",
 						"     ),",
 						"     format: 'parquet',",
-						"     truncate: true,",
 						"     umask: 0022,",
 						"     preCommands: [],",
 						"     postCommands: [],",
