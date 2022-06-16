@@ -46,10 +46,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "bronze_movie_tmp",
-						"type": "DatasetReference"
-					},
 					"logStorageSettings": {
 						"linkedServiceName": {
 							"referenceName": "ls_AzureDataLakeStorage",
@@ -84,10 +80,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "silver_movie_tmp",
-						"type": "DatasetReference"
-					},
 					"logStorageSettings": {
 						"linkedServiceName": {
 							"referenceName": "ls_AzureDataLakeStorage",

@@ -80,14 +80,7 @@
 				}
 			],
 			"scriptLines": [
-				"source(output(",
-				"          value as string,",
-				"          datasource as string,",
-				"          ingestdate as date,",
-				"          ingesttime as timestamp,",
-				"          status as string",
-				"     ),",
-				"     allowSchemaDrift: true,",
+				"source(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> bronze",
