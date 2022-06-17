@@ -28,7 +28,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "AzureSqlSource",
-									"sqlReaderQuery": "SELECT * FROM watermarktable WHERE TableName = '@{item().TABLE_NAME}'",
+									"sqlReaderQuery": {
+										"value": "SELECT * FROM watermarktable WHERE TableName = '@{item().TABLE_NAME}'",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -53,7 +56,10 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
-									"sqlReaderQuery": "SELECT MAX(@{item().WaterMark_Column}) AS NewWatermarkvalue FROM @{item().TABLE_NAME}",
+									"sqlReaderQuery": {
+										"value": "SELECT MAX(@{item().WaterMark_Column}) AS NewWatermarkvalue FROM @{item().TABLE_NAME}",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
@@ -91,18 +97,27 @@
 							"typeProperties": {
 								"source": {
 									"type": "SqlServerSource",
-									"sqlReaderQuery": "SELECT * FROM @{item().TABLE_NAME} WHERE @{item().WaterMark_Column} > '@{activity('LookupOldWaterMarkActivity').output.firstRow.WatermarkValue}' AND @{item().WaterMark_Column} <= '@{activity('LookupNewWaterMarkActivity').output.firstRow.NewWatermarkvalue}'",
+									"sqlReaderQuery": {
+										"value": "SELECT * FROM @{item().TABLE_NAME} WHERE @{item().WaterMark_Column} > '@{activity('old_watermark').output.firstRow.WatermarkValue}' AND @{item().WaterMark_Column} <= '@{activity('new_watermark').output.firstRow.NewWatermarkvalue}'",
+										"type": "Expression"
+									},
 									"queryTimeout": "02:00:00",
 									"partitionOption": "None"
 								},
 								"sink": {
 									"type": "AzureSqlSink",
-									"sqlWriterStoredProcedureName": "@{item().StoredProcedureNameForMergeOperation}",
+									"sqlWriterStoredProcedureName": {
+										"value": "@{item().StoredProcedureNameForMergeOperation}",
+										"type": "Expression"
+									},
 									"sqlWriterTableType": {
 										"value": "@{item().TableType}",
 										"type": "Expression"
 									},
-									"storedProcedureTableTypeParameterName": "@{item().TABLE_NAME}",
+									"storedProcedureTableTypeParameterName": {
+										"value": "@{item().TABLE_NAME}",
+										"type": "Expression"
+									},
 									"disableMetricsCollection": false
 								},
 								"enableStaging": false,
@@ -157,11 +172,17 @@
 								"storedProcedureName": "[dbo].[usp_write_watermark]",
 								"storedProcedureParameters": {
 									"LastModifiedtime": {
-										"value": "@{activity('new_watermark').output.firstRow.NewWatermarkvalue}",
+										"value": {
+											"value": "@{activity('new_watermark').output.firstRow.NewWatermarkvalue}",
+											"type": "Expression"
+										},
 										"type": "DateTime"
 									},
 									"TableName": {
-										"value": "@{activity('old_watermark').output.firstRow.TableName}",
+										"value": {
+											"value": "@{activity('old_watermark').output.firstRow.TableName}",
+											"type": "Expression"
+										},
 										"type": "String"
 									}
 								}
