@@ -11,6 +11,9 @@
 		"ls_AzureSqlDatabase_OLTP_connectionString": {
 			"value": ""
 		},
+		"ls_SqlServer_OLTP_connectionString": {
+			"value": ""
+		},
 		"ls_AzureDataLakeStorage_properties_typeProperties_url": {
 			"value": "https://antrasepadlsgen2.dfs.core.windows.net"
 		}
