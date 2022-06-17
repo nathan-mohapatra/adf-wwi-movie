@@ -1,0 +1,23 @@
+{
+	"name": "sink_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_AzureSqlDatabase_OLTP",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"sink_table_name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().sink_table_name",
+				"type": "Expression"
+			}
+		}
+	}
+}
