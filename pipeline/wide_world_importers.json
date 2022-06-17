@@ -1,0 +1,17 @@
+{
+	"name": "wide_world_importers",
+	"properties": {
+		"activities": [
+			{
+				"name": "filler",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			}
+		],
+		"annotations": []
+	}
+}

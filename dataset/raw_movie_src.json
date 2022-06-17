@@ -1,5 +1,5 @@
 {
-	"name": "raw_movie_source",
+	"name": "raw_movie_src",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_AzureDataLakeStorage",

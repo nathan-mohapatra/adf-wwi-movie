@@ -41,7 +41,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "raw_movie_source",
+						"referenceName": "raw_movie_src",
 						"type": "DatasetReference"
 					}
 				],
