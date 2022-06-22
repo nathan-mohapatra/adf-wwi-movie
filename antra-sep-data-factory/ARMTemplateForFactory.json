@@ -643,6 +643,9 @@
 					"referenceName": "ls_AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "movie"
+				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
@@ -667,6 +670,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "movie"
 				},
 				"annotations": [],
 				"type": "Parquet",
@@ -693,6 +699,9 @@
 					"referenceName": "ls_AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "movie"
+				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
@@ -718,6 +727,9 @@
 					"referenceName": "ls_AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "movie"
+				},
 				"annotations": [],
 				"type": "Parquet",
 				"typeProperties": {
@@ -742,6 +754,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "movie"
 				},
 				"annotations": [],
 				"type": "Json",
@@ -847,6 +862,9 @@
 					"referenceName": "ls_AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "movie"
+				},
 				"annotations": [],
 				"type": "Json",
 				"typeProperties": {
@@ -870,6 +888,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "movie"
 				},
 				"annotations": [],
 				"type": "Parquet",
@@ -895,6 +916,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_AzureDataLakeStorage",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "movie"
 				},
 				"annotations": [],
 				"type": "Parquet",
@@ -995,6 +1019,9 @@
 						"type": "string"
 					}
 				},
+				"folder": {
+					"name": "wide_world_importers"
+				},
 				"annotations": [],
 				"type": "AzureSqlTable",
 				"schema": [],
@@ -1018,6 +1045,9 @@
 					"referenceName": "ls_SqlServer_OLTP",
 					"type": "LinkedServiceReference"
 				},
+				"folder": {
+					"name": "wide_world_importers"
+				},
 				"annotations": [],
 				"type": "SqlServerTable",
 				"schema": [],
@@ -1035,6 +1065,9 @@
 				"linkedServiceName": {
 					"referenceName": "ls_AzureSqlDatabase_OLTP",
 					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "wide_world_importers"
 				},
 				"annotations": [],
 				"type": "AzureSqlTable",
