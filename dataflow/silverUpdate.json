@@ -1,6 +1,9 @@
 {
 	"name": "silverUpdate",
 	"properties": {
+		"folder": {
+			"name": "movie"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [

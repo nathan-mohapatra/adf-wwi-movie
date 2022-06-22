@@ -1,6 +1,9 @@
 {
 	"name": "rawToBronze",
 	"properties": {
+		"folder": {
+			"name": "movie"
+		},
 		"type": "MappingDataFlow",
 		"typeProperties": {
 			"sources": [
