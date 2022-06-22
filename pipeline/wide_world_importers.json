@@ -106,18 +106,8 @@
 								},
 								"sink": {
 									"type": "AzureSqlSink",
-									"sqlWriterStoredProcedureName": {
-										"value": "@{item().StoredProcedureNameForMergeOperation}",
-										"type": "Expression"
-									},
-									"sqlWriterTableType": {
-										"value": "@{item().TableType}",
-										"type": "Expression"
-									},
-									"storedProcedureTableTypeParameterName": {
-										"value": "@{item().TABLE_NAME}",
-										"type": "Expression"
-									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
 									"disableMetricsCollection": false
 								},
 								"enableStaging": false,
