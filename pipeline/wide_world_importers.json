@@ -98,7 +98,7 @@
 								"source": {
 									"type": "SqlServerSource",
 									"sqlReaderQuery": {
-										"value": "SELECT * FROM @{item().TABLE_NAME} WHERE @{item().WaterMark_Column} > '@{activity('old_watermark').output.firstRow.WatermarkValue}' AND @{item().WaterMark_Column} <= '@{activity('new_watermark').output.value}'",
+										"value": "SELECT * FROM @{item().TABLE_NAME} WHERE @{item().WaterMark_Column} > '@{activity('old_watermark').output.value}' AND @{item().WaterMark_Column} <= '@{activity('new_watermark').output.value}'",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
