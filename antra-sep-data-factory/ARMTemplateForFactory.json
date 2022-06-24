@@ -455,7 +455,7 @@
 										"source": {
 											"type": "AzureSqlSource",
 											"sqlReaderQuery": {
-												"value": "SELECT * FROM watermarktable WHERE TableName = '@{item().TABLE_NAME}'",
+												"value": "SELECT * FROM watermark_table WHERE TableName = '@{item().TABLE_NAME}'",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
