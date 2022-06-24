@@ -1339,6 +1339,9 @@
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
 				},
+				"folder": {
+					"name": "movie"
+				},
 				"annotations": []
 			},
 			"dependsOn": [
@@ -1487,6 +1490,9 @@
 				"policy": {
 					"elapsedTimeMetric": {},
 					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "movie"
 				},
 				"annotations": []
 			},
