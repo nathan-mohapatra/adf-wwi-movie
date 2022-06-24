@@ -116,7 +116,7 @@
 										"source": {
 											"type": "SqlServerSource",
 											"sqlReaderQuery": {
-												"value": "SELECT * FROM @{item().TABLE_NAME} WHERE @{item().WaterMark_Column} > '@{activity('old_watermark').output.value}' AND @{item().WaterMark_Column} <= '@{activity('new_watermark').output.value}'",
+												"value": "select * from @{item().TABLE_NAME} where @{item().WaterMark_Column} > '@{activity('old_watermark').output.firstRow.WatermarkValue}' and @{item().WaterMark_Column} <= '@{activity('new_watermark').output.firstRow.NewWatermarkvalue}'",
 												"type": "Expression"
 											},
 											"queryTimeout": "02:00:00",
@@ -192,14 +192,14 @@
 										"storedProcedureParameters": {
 											"LastModifiedtime": {
 												"value": {
-													"value": "MAX(@{item().WaterMark_Column})",
+													"value": "@{activity('new_watermark').output.firstRow.NewWatermarkvalue}",
 													"type": "Expression"
 												},
 												"type": "DateTime"
 											},
 											"TableName": {
 												"value": {
-													"value": "@{item().TABLE_NAME}",
+													"value": "\t@{activity('old_watermark').output.firstRow.TableName}",
 													"type": "Expression"
 												},
 												"type": "String"
