@@ -173,7 +173,7 @@
 								"storedProcedureParameters": {
 									"LastModifiedtime": {
 										"value": {
-											"value": "@{activity('new_watermark').output.value}",
+											"value": "MAX(@{item().WaterMark_Column})",
 											"type": "Expression"
 										},
 										"type": "DateTime"
