@@ -1035,7 +1035,8 @@
 				"type": "AzureSqlTable",
 				"schema": [],
 				"typeProperties": {
-					"schema": {
+					"schema": "dbo",
+					"table": {
 						"value": "@dataset().sink_table_name",
 						"type": "Expression"
 					}
