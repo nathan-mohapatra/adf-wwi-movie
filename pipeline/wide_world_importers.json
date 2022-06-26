@@ -249,7 +249,13 @@
 							"outputs": [
 								{
 									"referenceName": "ods",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"ods_table_name": {
+											"value": "@{activity('old_watermark').output.firstRow.TableName}",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}

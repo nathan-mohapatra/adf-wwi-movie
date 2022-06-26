@@ -5,11 +5,23 @@
 			"referenceName": "ls_AzureSqlDatabase_ODS",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"ods_table_name": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "wide_world_importers"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
-		"schema": []
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": {
+				"value": "@dataset().ods_table_name",
+				"type": "Expression"
+			}
+		}
 	}
 }
