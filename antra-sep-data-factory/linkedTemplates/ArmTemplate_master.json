@@ -11,9 +11,17 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'ls_AzureDataLakeStorage'"
 		},
+		"ls_AzureSqlDatabase_ODS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_AzureSqlDatabase_ODS'"
+		},
 		"ls_AzureSqlDatabase_OLTP_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'ls_AzureSqlDatabase_OLTP'"
+		},
+		"ls_SqlServer_ODS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_SqlServer_ODS'"
 		},
 		"ls_SqlServer_OLTP_connectionString": {
 			"type": "secureString",
@@ -53,8 +61,14 @@
 					"ls_AzureDataLakeStorage_accountKey": {
 						"value": "[parameters('ls_AzureDataLakeStorage_accountKey')]"
 					},
+					"ls_AzureSqlDatabase_ODS_connectionString": {
+						"value": "[parameters('ls_AzureSqlDatabase_ODS_connectionString')]"
+					},
 					"ls_AzureSqlDatabase_OLTP_connectionString": {
 						"value": "[parameters('ls_AzureSqlDatabase_OLTP_connectionString')]"
+					},
+					"ls_SqlServer_ODS_connectionString": {
+						"value": "[parameters('ls_SqlServer_ODS_connectionString')]"
 					},
 					"ls_SqlServer_OLTP_connectionString": {
 						"value": "[parameters('ls_SqlServer_OLTP_connectionString')]"

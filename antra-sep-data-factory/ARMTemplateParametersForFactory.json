@@ -8,7 +8,13 @@
 		"ls_AzureDataLakeStorage_accountKey": {
 			"value": ""
 		},
+		"ls_AzureSqlDatabase_ODS_connectionString": {
+			"value": ""
+		},
 		"ls_AzureSqlDatabase_OLTP_connectionString": {
+			"value": ""
+		},
+		"ls_SqlServer_ODS_connectionString": {
 			"value": ""
 		},
 		"ls_SqlServer_OLTP_connectionString": {
