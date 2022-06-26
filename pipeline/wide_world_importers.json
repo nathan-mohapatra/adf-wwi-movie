@@ -198,7 +198,21 @@
 		],
 		"parameters": {
 			"table_list": {
-				"type": "array"
+				"type": "array",
+				"defaultValue": [
+					{
+						"TABLE_NAME": "orders_table",
+						"WaterMark_Column": "LastEditedWhen",
+						"TableType": "DataTypeforOrdersTable",
+						"StoredProcedureNameForMergeOperation": "usp_upsert_orders_table"
+					},
+					{
+						"TABLE_NAME": "order_lines_table",
+						"WaterMark_Column": "LastEditedWhen",
+						"TableType": "DataTypeforOrderLinesTable",
+						"StoredProcedureNameForMergeOperation": "usp_upsert_order_lines_table"
+					}
+				]
 			}
 		},
 		"annotations": []
