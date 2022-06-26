@@ -191,6 +191,67 @@
 								"referenceName": "ls_AzureSqlDatabase_OLTP",
 								"type": "LinkedServiceReference"
 							}
+						},
+						{
+							"name": "ods_copy",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "sp_write_watermark",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "sink_dataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"sink_table_name": {
+											"value": "@{activity('old_watermark').output.firstRow.TableName}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ods",
+									"type": "DatasetReference"
+								}
+							]
 						}
 					]
 				}
