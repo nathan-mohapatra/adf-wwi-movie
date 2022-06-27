@@ -832,7 +832,7 @@
 						}
 					},
 					{
-						"name": "sp_generate_fact",
+						"name": "sp_generate_olap",
 						"type": "SqlServerStoredProcedure",
 						"dependsOn": [
 							{
@@ -851,34 +851,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"storedProcedureName": "[[dbo].[usp_generate_fact_table]"
-						},
-						"linkedServiceName": {
-							"referenceName": "ls_AzureSqlDatabase_Integration",
-							"type": "LinkedServiceReference"
-						}
-					},
-					{
-						"name": "sp_generate_dim",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [
-							{
-								"activity": "sp_generate_fact",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[usp_generate_dimension_table]"
+							"storedProcedureName": "[[dbo].[usp_generate_olap_tables]"
 						},
 						"linkedServiceName": {
 							"referenceName": "ls_AzureSqlDatabase_Integration",
