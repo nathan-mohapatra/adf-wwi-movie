@@ -260,7 +260,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"integration_schema": {
+					"integration_schema_name": {
 						"type": "string"
 					},
 					"integration_table_name": {
@@ -275,7 +275,7 @@
 				"schema": [],
 				"typeProperties": {
 					"schema": {
-						"value": "@dataset().integration_schema",
+						"value": "@dataset().integration_schema_name",
 						"type": "Expression"
 					},
 					"table": {
@@ -318,6 +318,44 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDatabase_ODS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/olap')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSqlDatabase_OLAP",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"olap_schema_name": {
+						"type": "string"
+					},
+					"olap_table_name": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "wide_world_importers"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().olap_schema_name",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().olap_table_name",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDatabase_OLAP')]"
 			]
 		},
 		{
@@ -605,38 +643,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_AzureDataLakeStorage')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/sink_dataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_AzureSqlDatabase_OLTP",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"sink_table_name": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "wide_world_importers"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": "dbo",
-					"table": {
-						"value": "@dataset().sink_table_name",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDatabase_OLTP')]"
 			]
 		}
 	]
