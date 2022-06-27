@@ -437,7 +437,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "iterate_tables",
+						"name": "iterate_oltp",
 						"type": "ForEach",
 						"dependsOn": [
 							{
