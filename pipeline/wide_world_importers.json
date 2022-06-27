@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@pipeline().parameters.table_list",
+						"value": "@pipeline().parameters.oltp_table_list",
 						"type": "Expression"
 					},
 					"activities": [
@@ -322,7 +322,7 @@
 									"referenceName": "integration",
 									"type": "DatasetReference",
 									"parameters": {
-										"integration_schema": "dbo",
+										"integration_schema_name": "dbo",
 										"integration_table_name": "@{activity('old_watermark').output.firstRow.TableName}"
 									}
 								}
@@ -383,7 +383,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "iterate_oltp",
+						"activity": "sp_drop_olap",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -404,10 +404,126 @@
 					"referenceName": "ls_AzureSqlDatabase_Integration",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "iterate_olap",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "sp_generate_olap",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.olap_table_list",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "olap_copy",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate",
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "integration",
+									"type": "DatasetReference",
+									"parameters": {
+										"integration_schema_name": {
+											"value": "@{item().SCHEMA_NAME}",
+											"type": "Expression"
+										},
+										"integration_table_name": {
+											"value": "@{item().TABLE_NAME}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "olap",
+									"type": "DatasetReference",
+									"parameters": {
+										"olap_schema_name": {
+											"value": "@{item().SCHEMA_NAME}",
+											"type": "Expression"
+										},
+										"olap_table_name": {
+											"value": "@{item().TABLE_NAME}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "sp_drop_olap",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "iterate_oltp",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[usp_drop_olap_tables]"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_AzureSqlDatabase_OLAP",
+					"type": "LinkedServiceReference"
+				}
 			}
 		],
 		"parameters": {
-			"table_list": {
+			"oltp_table_list": {
 				"type": "array",
 				"defaultValue": [
 					{
@@ -421,6 +537,19 @@
 						"WaterMark_Column": "LastEditedWhen",
 						"TableType": "DataTypeforOrderLinesTable",
 						"StoredProcedureNameForMergeOperation": "usp_upsert_order_lines_table"
+					}
+				]
+			},
+			"olap_table_list": {
+				"type": "array",
+				"defaultValue": [
+					{
+						"SCHEMA_NAME": "Fact",
+						"TABLE_NAME": "Orders"
+					},
+					{
+						"SCHEMA_NAME": "Dimension",
+						"TABLE_NAME": "Customers"
 					}
 				]
 			}

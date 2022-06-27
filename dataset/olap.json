@@ -1,15 +1,15 @@
 {
-	"name": "integration",
+	"name": "olap",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_AzureSqlDatabase_Integration",
+			"referenceName": "ls_AzureSqlDatabase_OLAP",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"integration_schema_name": {
+			"olap_schema_name": {
 				"type": "string"
 			},
-			"integration_table_name": {
+			"olap_table_name": {
 				"type": "string"
 			}
 		},
@@ -21,11 +21,11 @@
 		"schema": [],
 		"typeProperties": {
 			"schema": {
-				"value": "@dataset().integration_schema_name",
+				"value": "@dataset().olap_schema_name",
 				"type": "Expression"
 			},
 			"table": {
-				"value": "@dataset().integration_table_name",
+				"value": "@dataset().olap_table_name",
 				"type": "Expression"
 			}
 		}
