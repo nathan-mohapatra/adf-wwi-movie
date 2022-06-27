@@ -457,7 +457,7 @@
 						"type": "ForEach",
 						"dependsOn": [
 							{
-								"activity": "drop_ods",
+								"activity": "sp_drop_integration",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -785,7 +785,7 @@
 						}
 					},
 					{
-						"name": "drop_ods",
+						"name": "sp_drop_ods",
 						"type": "SqlServerStoredProcedure",
 						"dependsOn": [],
 						"policy": {
@@ -797,10 +797,64 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"storedProcedureName": "[[dbo].[drop_ods_tables]"
+							"storedProcedureName": "[[dbo].[usp_drop_ods_tables]"
 						},
 						"linkedServiceName": {
 							"referenceName": "ls_AzureSqlDatabase_ODS",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "sp_drop_integration",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "sp_drop_ods",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_drop_integration_tables]"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_AzureSqlDatabase_Integration",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "sp_generate_olap",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "iterate_oltp",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_generate_olap_tables]"
+						},
+						"linkedServiceName": {
+							"referenceName": "ls_AzureSqlDatabase_Integration",
 							"type": "LinkedServiceReference"
 						}
 					}
@@ -832,6 +886,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDatabase_ODS')]",
+				"[concat(variables('factoryId'), '/linkedServices/ls_AzureSqlDatabase_Integration')]",
 				"[concat(variables('factoryId'), '/datasets/watermark_dataset')]",
 				"[concat(variables('factoryId'), '/datasets/source_dataset')]",
 				"[concat(variables('factoryId'), '/datasets/sink_dataset')]",
